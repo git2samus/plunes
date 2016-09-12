@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="es" ng-app="gruposApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PLunes</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+      .marker {
+        margin-bottom: 15px;
+      } .marker > div {
+        border-left: 2px solid navy;
+      }
+      .profile-row {
+        margin-bottom: 5px;
+      } .profile {
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none;   /* Chrome/Safari/Opera */
+        -khtml-user-select: none;    /* Konqueror */
+        -moz-user-select: none;      /* Firefox */
+        -ms-user-select: none;       /* Internet Explorer/Edge */
+        user-select: none;           /* Non-prefixed version, currently */
+        cursor: pointer;
+      }
+      .strong {
+        font-weight: bold;
+      }
+      input[type=number] {
+        width: 2em;
+      }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.2/seedrandom.min.js"></script>
+    <script>
+      var names = [
+        'Antonella Roascio', 'Michael Cetrulo', 'María Elisa Amado',
+        'Virginia Bautes', 'Viviana Cabrera', 'Betina Campero',
+        'Angela Colomar', 'Jimena Diaz', 'Ma. Cecilia Diaz',
+        'Daniel Duran', 'María Raquel Ferrari', 'Raquel Ferro',
+        'Fiorella Ferrua', 'Lorena Flores', 'Sara Gari Oliu',
+        'Diego Giansanti', 'Matias González', 'Patricia Heredia',
+        'Lucia Marmol', 'Mónica Perez', 'Noelia Pollan',
+        'Viviana Ramos', 'Raquel Rosenzweig', 'Mónica Urioste',
+        'Graciela Vázquez', 'Gustavo Villarreal', 'Lourdes Botarro',
+        'Magdalena Sörensen', 'Leticia Rossini', 'Facundo Piuma',
+        'Liliana Mateo', 'Romina López', 'Richard Cordero',
+        'Andrea Romero', 'Daniela Rodriguez', 'Carlos Martínez'];
+
+      var gruposApp = angular.module('gruposApp', []);
+      gruposApp.controller('gruposCtrl', function gruposCtrl($scope) {
+        $scope.setPresence = function(state, profile_id) {
+          // swap members from present-absent or back
+          var from, to;
+          if (state) {
+            from = $scope.absent;
+            to = $scope.present;
+          } else {
+            from = $scope.present;
+            to = $scope.absent;
+          };
+
+          if (profile_id === undefined) {
+            // swap all members
+            var extracted = from.splice(0);
+            for (var i=0; i<extracted.length; i++) {
+              to.push(extracted[i]);
+            };
+          } else {
+            // swap a single member
+            var i;
+            for (i=0; i<from.length; i++) {
+              if (from[i].id == profile_id)
+                break;
+            };
+
+            var extracted = from.splice(i, 1);
+            to.push(extracted.pop());
+          };
+        };
+
+        $scope.updateSeed = function() {
+          // create a new seed
+          $scope.seed = Date.now();
+        };
+
+        $scope.resetSeed = function() {
+          // reset random sequence
+          Math.seedrandom($scope.seed);
+        };
+
+        $scope.genGroups = function() {
+          // create groups
+          $scope.groups = [];
+          for (var i=0; i<$scope.numGroups; i++) {
+            $scope.groups.push([]);
+          };
+
+          // reinitialize random sequence
+          $scope.resetSeed();
+
+          // arbitrary initial sorting
+          var profiles = $scope.present.slice();
+          profiles.sort(function(a, b) { return a.id - b.id; })
+
+          // randomize with current seed
+          for (var i=0; i<profiles.length; i++) {
+            var j = Math.floor(Math.random() * (profiles.length - i));
+            profiles.push(profiles.splice(j, 1).pop());
+          };
+
+          // move starred elements to the beginning
+          profiles.sort(function(a, b) { return (b.starred? 1:0) - (a.starred? 1:0); });
+
+          // fill group buckets
+          for (var i=0; i<profiles.length; i++) {
+            $scope.groups[i % $scope.numGroups].push(profiles[i]);
+          };
+        };
+
+        $scope.present = [];
+        $scope.absent = [];
+        $scope.numGroups = 2;
+
+        // fill-in initial values
+        for (var i=0; i<names.length; i++) {
+          var name = names[i];
+          $scope.present.push({
+            'id': i,
+            'name': name,
+            'img': 'img/' + name + '.png',
+            'starred': false});
+        };
+
+        // setup watchers
+        $scope.$watch(function() {
+          var res = '';
+          for (var i=0; i<$scope.present.length; i++) {
+            var profile = $scope.present[i];
+            res += (profile.starred? '+':'-') + profile.id;
+          };
+          return res;
+        }, function() { $scope.genGroups(); });
+        $scope.$watch('numGroups', function() { $scope.genGroups(); });
+        $scope.$watch('seed', function() { $scope.genGroups(); });
+
+        // generate initial groups
+        $scope.updateSeed();
+      });
+    </script>
+  </head>
+
+  <body ng-controller="gruposCtrl">
+    <div class="container">
+      <h1 class="text-center">PRACTITIONER PNL - Lunes 2016</h1>
+      <p class="lead text-center">Creación de grupos de trabajo</p>
+
+      <div class="row marker">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+          <h2>Presentes</h2>
+          <p><a href="javascript:void(0)" ng-click="setPresence(false)">quitar todos</a></p>
+          <div class="profile-row" ng-repeat="profile in present | orderBy:'name'">
+            <input type="checkbox" ng-click="setPresence(false, profile.id)" checked />
+            <span class="profile" ng-click="profile.starred = !profile.starred;">
+              <span ng-class="{'glyphicon': true, 'glyphicon-star-empty': !profile.starred, 'glyphicon-star': profile.starred}"></span>{{profile.name}}
+            </span>
+          </div>
+        </div>
+
+        <div class="col-xs-12 col-sm-6 col-md-3">
+          <h2>Ausentes</h2>
+          <p><a href="javascript:void(0)" ng-click="setPresence(true)">agregar todos</a></p>
+          <div class="profile-row" ng-repeat="profile in absent | orderBy:'name'">
+            <input type="checkbox" ng-click="setPresence(true, profile.id)" />
+            <span class="profile" ng-click="profile.starred = !profile.starred;">
+              <span ng-class="{'glyphicon': true, 'glyphicon-star-empty': !profile.starred, 'glyphicon-star': profile.starred}"></span>{{profile.name}}
+            </span>
+          </div>
+        </div>
+
+        <div class="col-xs-12 col-sm-12 col-md-6">
+          <h2>Grupos</h2>
+          <label>
+            Dividir en <input ng-model="numGroups" min="2" type="number" /> grupos.
+          </label>
+          <input type="button" value="Reordenar" ng-click="updateSeed()">
+
+          <div class="row">
+            <div ng-repeat="group in groups" class="col-xs-12 col-sm-6">
+              <h3>Grupo {{$index + 1}}</h3>
+              <ol>
+                <li ng-repeat="profile in group">
+                  <span ng-class="{'strong': profile.starred}">{{profile.name}}</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
