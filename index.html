@@ -231,7 +231,13 @@
         </div>
 
         <div class="col-xs-12 col-md-6">
-          <h2>Grupos</h2>
+          <h2>
+            Grupos
+            <button type="button" class="btn btn-default btn-sm" ng-click="updateSeed()" aria-label="Reordenar">
+              <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+              Reordenar
+            </button>
+          </h2>
 
           <div>
             <input ng-model="selType" value="numGroups" type="radio">
@@ -246,11 +252,6 @@
               Formar grupos de <input ng-model="groupSize" min="1" type="number" /> personas.
             </label>
           </div>
-
-          <button type="button" class="btn btn-default btn-sm" ng-click="updateSeed()" aria-label="Editar">
-            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
-            Reordenar
-          </button>
 
           <div class="row">
             <div ng-repeat="group in groups" ng-class="{'col-xs-6': true, 'clearfix': $index % 2 == 0}">
