@@ -38,22 +38,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.2/seedrandom.min.js"></script>
     <script>
-      var names = [
-        'Antonella Roascio', 'Michael Cetrulo', 'María Elisa Amado',
-        'Virginia Bautes', 'Viviana Cabrera', 'Betina Campero',
-        'Angela Colomar', 'Jimena Diaz', 'Ma. Cecilia Diaz',
-        'Daniel Duran', 'María Raquel Ferrari', 'Raquel Ferro',
-        'Fiorella Ferrua', 'Lorena Flores', 'Sara Gari Oliu',
-        'Diego Giansanti', 'Matias González', 'Patricia Heredia',
-        'Lucia Marmol', 'Mónica Perez', 'Noelia Pollan',
-        'Viviana Ramos', 'Raquel Rosenzweig', 'Mónica Urioste',
-        'Graciela Vázquez', 'Gustavo Villarreal', 'Lourdes Botarro',
-        'Magdalena Sörensen', 'Leticia Rossini', 'Facundo Piuma',
-        'Liliana Mateo', 'Romina López', 'Richard Cordero',
-        'Andrea Romero', 'Daniela Rodriguez', 'Carlos Martínez'];
-
       var gruposApp = angular.module('gruposApp', []);
-      gruposApp.controller('gruposCtrl', function gruposCtrl($scope) {
+      gruposApp.controller('gruposCtrl', function gruposCtrl($scope, $http) {
         $scope.setPresence = function(state, profile_id) {
           // swap members from present-absent or back
           var from, to;
@@ -137,21 +123,16 @@
           };
         };
 
-        // init //
+        // init values //
         $scope.present = [];
         $scope.absent = [];
+        $scope.groups = [];
 
         $scope.selType = 'numGroups';
         $scope.numGroups = 2;
 
-        // fill-in initial values
-        for (var i=0; i<names.length; i++) {
-          var name = names[i];
-          $scope.present.push({
-            'id': i,
-            'name': name,
-            'starred': false});
-        };
+        // generate initial seed
+        $scope.updateSeed();
 
         // setup watchers
         $scope.$watch(function() {
@@ -180,8 +161,19 @@
           $scope.genGroups();
         });
 
-        // generate initial groups
-        $scope.updateSeed();
+        // fill-in initial values
+        $http.get('names.json').then(function(response) {
+          var names = response.data.names;
+          for (var i=0; i<names.length; i++) {
+            var name = names[i];
+            $scope.present.push({
+              'id': i,
+              'name': name,
+              'starred': false});
+          };
+        }, function(response) {
+          console.log(['http error', response]);
+        });
       });
     </script>
   </head>
