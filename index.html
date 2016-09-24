@@ -123,10 +123,24 @@
           };
         };
 
+        $scope.getName = function(index) {
+          return $scope.groupNames[index] || "Grupo " + (index+1);
+        };
+
+        $scope.setEdit = function(index, editMode) {
+          if (editMode) {
+            $scope.editIndex = index;
+          } else {
+            $scope.editIndex = null;
+          };
+        };
+
         // init values //
         $scope.present = [];
         $scope.absent = [];
+
         $scope.groups = [];
+        $scope.groupNames = {};
 
         $scope.selType = 'numGroups';
         $scope.numGroups = 2;
@@ -233,11 +247,25 @@
             </label>
           </div>
 
-          <input type="button" value="Reordenar" ng-click="updateSeed()">
+          <button type="button" class="btn btn-default btn-sm" ng-click="updateSeed()" aria-label="Editar">
+            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+            Reordenar
+          </button>
 
           <div class="row">
             <div ng-repeat="group in groups" ng-class="{'col-xs-6': true, 'clearfix': $index % 2 == 0}">
-              <h3>Grupo {{$index + 1}}</h3>
+              <h3>
+                <span ng-hide="editIndex == $index">
+                  {{ getName($index) }}
+                  <button type="button" class="btn btn-default btn-xs" ng-click="setEdit($index, true)" aria-label="Editar">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                  </button>
+                </span>
+                <form ng-submit="setEdit($index, false)">
+                  <input type="text" ng-show="editIndex == $index" ng-blur="setEdit($index, false)" ng-model="groupNames[$index]">
+                </form>
+              </h3>
+
               <ol>
                 <li ng-repeat="profile in group">
                   <span ng-class="{'strong': profile.starred}">{{profile.name}}</span>
