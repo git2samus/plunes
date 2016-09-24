@@ -31,7 +31,7 @@
         font-weight: bold;
       }
       input[type=number] {
-        width: 2em;
+        width: 3em;
       }
     </style>
 
@@ -97,8 +97,14 @@
         $scope.genGroups = function() {
           // create groups
           $scope.groups = [];
-          for (var i=0; i<$scope.numGroups; i++) {
-            $scope.groups.push([]);
+          if ($scope.selType == 'numGroups') {
+            for (var i=0; i<$scope.numGroups; i++) {
+              $scope.groups.push([]);
+            };
+          } else {
+            for (var i=0; i<Math.floor($scope.present.length / $scope.groupSize); i++) {
+              $scope.groups.push([]);
+            };
           };
 
           // reinitialize random sequence
@@ -119,12 +125,23 @@
 
           // fill group buckets
           for (var i=0; i<profiles.length; i++) {
-            $scope.groups[i % $scope.numGroups].push(profiles[i]);
+            $scope.groups[i % $scope.groups.length].push(profiles[i]);
+          };
+
+          if ($scope.selType == 'numGroups') {
+            // update reference value groupSize
+            $scope.groupSize = $scope.groups[$scope.groups.length - 1].length;
+          } else {
+            // update reference value numGroups
+            $scope.numGroups = $scope.groups.length;
           };
         };
 
+        // init //
         $scope.present = [];
         $scope.absent = [];
+
+        $scope.selType = 'numGroups';
         $scope.numGroups = 2;
 
         // fill-in initial values
@@ -133,21 +150,35 @@
           $scope.present.push({
             'id': i,
             'name': name,
-            'img': 'img/' + name + '.png',
             'starred': false});
         };
 
         // setup watchers
         $scope.$watch(function() {
+          // generate string to watch starred property changes
           var res = '';
           for (var i=0; i<$scope.present.length; i++) {
             var profile = $scope.present[i];
             res += (profile.starred? '+':'-') + profile.id;
           };
           return res;
-        }, function() { $scope.genGroups(); });
-        $scope.$watch('numGroups', function() { $scope.genGroups(); });
-        $scope.$watch('seed', function() { $scope.genGroups(); });
+        }, function() {
+          $scope.genGroups();
+        });
+        $scope.$watch('numGroups', function() {
+          if ($scope.selType == 'numGroups')
+            $scope.genGroups();
+        });
+        $scope.$watch('groupSize', function() {
+          if ($scope.selType == 'groupSize')
+            $scope.genGroups();
+        });
+        $scope.$watch('selType', function() {
+          $scope.genGroups();
+        });
+        $scope.$watch('seed', function() {
+          $scope.genGroups();
+        });
 
         // generate initial groups
         $scope.updateSeed();
@@ -185,8 +216,21 @@
 
         <div class="col-xs-12 col-md-6">
           <h2>Grupos</h2>
-            Dividir en <input ng-model="numGroups" min="2" type="number" /> grupos.
-          </label>
+
+          <div>
+            <input ng-model="selType" value="numGroups" type="radio">
+            <label ng-click="selType='numGroups'">
+              Dividir en <input ng-model="numGroups" min="2" type="number" /> grupos.
+            </label>
+          </div>
+
+          <div>
+            <input ng-model="selType" value="groupSize" type="radio">
+            <label ng-click="selType='groupSize'">
+              Formar grupos de <input ng-model="groupSize" min="1" type="number" /> personas.
+            </label>
+          </div>
+
           <input type="button" value="Reordenar" ng-click="updateSeed()">
 
           <div class="row">
