@@ -194,22 +194,32 @@
       <div class="row marker">
         <div class="col-xs-6 col-md-3">
           <h2>Presentes</h2>
-          <p><a href="javascript:void(0)" ng-click="setPresence(false)">quitar todos</a></p>
+          <p>
+            <a href="javascript:void(0)" ng-click="setPresence(false)">
+              Quitar todos
+              <span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+            </a>
+          </p>
           <div class="profile-row" ng-repeat="profile in present | orderBy:'name'">
             <input type="checkbox" ng-click="setPresence(false, profile.id)" checked />
             <span class="profile" ng-click="profile.starred = !profile.starred;">
-              <span ng-class="{'glyphicon': true, 'glyphicon-star-empty': !profile.starred, 'glyphicon-star': profile.starred}"></span>{{profile.name}}
+              <span ng-class="{'glyphicon': true, 'glyphicon-star-empty': !profile.starred, 'glyphicon-star': profile.starred}" aria-hidden="true"></span>{{profile.name}}
             </span>
           </div>
         </div>
 
         <div class="col-xs-6 col-md-3">
           <h2>Ausentes</h2>
-          <p><a href="javascript:void(0)" ng-click="setPresence(true)">agregar todos</a></p>
+          <p>
+            <a href="javascript:void(0)" ng-click="setPresence(true)">
+              <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+              Agregar todos
+            </a>
+          </p>
           <div class="profile-row" ng-repeat="profile in absent | orderBy:'name'">
             <input type="checkbox" ng-click="setPresence(true, profile.id)" />
             <span class="profile" ng-click="profile.starred = !profile.starred;">
-              <span ng-class="{'glyphicon': true, 'glyphicon-star-empty': !profile.starred, 'glyphicon-star': profile.starred}"></span>{{profile.name}}
+              <span ng-class="{'glyphicon': true, 'glyphicon-star-empty': !profile.starred, 'glyphicon-star': profile.starred}" aria-hidden="true"></span>{{profile.name}}
             </span>
           </div>
         </div>
