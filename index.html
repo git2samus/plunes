@@ -75,6 +75,12 @@
           };
         };
 
+        $scope.swapPresence = function() {
+          var swap = $scope.absent;
+          $scope.absent = $scope.present;
+          $scope.present = swap;
+        };
+
         $scope.updateSeed = function() {
           // create a new seed
           $scope.seed = Date.now();
@@ -209,7 +215,14 @@
 
       <div class="row marker">
         <div class="col-xs-6 col-md-3">
-          <h2>Presentes</h2>
+          <h2>
+            Presentes
+            <button type="button" class="btn btn-default btn-sm" ng-click="swapPresence()" aria-label="Intercambiar">
+              <span class="glyphicon glyphicon-resize-horizontal" aria-hidden="true"></span>
+              Intercambiar
+            </button>
+          </h2>
+
           <p>
             <a href="javascript:void(0)" ng-click="setPresence(false)">
               Quitar todos
